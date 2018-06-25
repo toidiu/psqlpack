@@ -11,11 +11,13 @@ use serde_json;
 
 use errors::{PsqlpackResult, PsqlpackResultExt};
 use errors::PsqlpackErrorKind::*;
+use super::PackageParameter;
 
 #[derive(Deserialize, Serialize)]
 pub struct PublishProfile {
     pub version: String,
     #[serde(rename = "generationOptions")] pub generation_options: GenerationOptions,
+    #[serde(default, rename = "packageParameters")] pub package_parameters: Vec<PackageParameter>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -61,6 +63,7 @@ impl Default for PublishProfile {
     fn default() -> Self {
         PublishProfile {
             version: "1.0".to_owned(),
+            package_parameters: Vec::new(),
             generation_options: GenerationOptions {
                 always_recreate_database: false,
 

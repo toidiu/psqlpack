@@ -89,11 +89,12 @@ pub enum Token {
     WITHOUT,
     ZONE,
 
-    Identifier(String),
-    Digit(i32),
     Boolean(bool),
-    StringValue(String),
+    Digit(i32),
+    Identifier(String),
     Literal(String),
+    PackageParameter(String),
+    StringValue(String),
 
     LeftBracket,
     RightBracket,
@@ -126,11 +127,10 @@ pub struct LexicalError<'input> {
 }
 
 lazy_static! {
-
-    static ref IDENTIFIER: Regex = Regex::new("^[a-zA-Z][a-zA-Z0-9_]+$").unwrap();
     static ref DIGIT: Regex = Regex::new("^\\d+$").unwrap();
+    static ref IDENTIFIER: Regex = Regex::new("^[a-zA-Z][a-zA-Z0-9_]+$").unwrap();
+    static ref PACKAGE_PARAMETER: Regex = Regex::new("^\\$\\([a-zA-Z][a-zA-Z0-9_]+\\)$").unwrap();
 }
-
 
 macro_rules! tokenize_buffer {
     ($tokens:ident, $buffer:ident, $line:ident, $current_line:ident, $current_position:ident) => {{
@@ -258,11 +258,14 @@ fn create_token(value: String) -> Option<Token> {
     match_keyword!(value, ZONE);
 
     // Regex
+    if DIGIT.is_match(&value[..]) {
+        return Some(Token::Digit(value.parse::<i32>().unwrap()));
+    }
     if IDENTIFIER.is_match(&value[..]) {
         return Some(Token::Identifier(value));
     }
-    if DIGIT.is_match(&value[..]) {
-        return Some(Token::Digit(value.parse::<i32>().unwrap()));
+    if PACKAGE_PARAMETER.is_match(&value[..]) {
+        return Some(Token::PackageParameter(String::from(&value[2..(value.len() - 1)])));
     }
 
     // Error

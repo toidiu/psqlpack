@@ -7,6 +7,12 @@ macro_rules! dbtry {
     };
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct PackageParameter {
+    name: String,
+    value: String,
+}
+
 mod profiles;
 mod project;
 mod package;
